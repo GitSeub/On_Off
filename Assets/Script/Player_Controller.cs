@@ -18,12 +18,20 @@ public class Player_Controller : MonoBehaviour
     private float velPower;
     [SerializeField]
     private float jump;
+    [SerializeField]
+    private float WallJumpUp;
+    [SerializeField]
+    private float WallJumpSide;
+    [SerializeField]
+    private float WallSlide;
     public bool Grounded;
-    public bool Jumping;
+    private bool Jumping;
     private float yVelocity;
     private float xVelocity;
     private float movementX;
     public GameObject Mesh;
+    public bool wallJump;
+    public bool wallJumping;
     //public Animator Anim;
     // Start is called before the first frame update
     void Start()
@@ -41,20 +49,21 @@ public class Player_Controller : MonoBehaviour
 
         Move();
         Jump();
+        WallJump();
     }
 
     private void Move()
     {
         _Input = Input.GetAxis("Horizontal");
 
-        if (Grounded)
+        if (Grounded && !wallJumping)
         {
             float targetSpeedX = _Input * Speed;
             float speedDifX = targetSpeedX - _rb.velocity.x;
             float accelRateX = (Mathf.Abs(targetSpeedX) < 0.01f) ? Acceleration : Deceleration;
             movementX = Mathf.Pow(Mathf.Abs(speedDifX) * accelRateX, velPower) * Mathf.Sign(speedDifX);
         }
-        if (!Grounded)
+        if (!Grounded && !wallJumping)
         {
             float targetSpeedX = _Input * AirSpeed;
             float speedDifX = targetSpeedX - _rb.velocity.x;
@@ -63,8 +72,8 @@ public class Player_Controller : MonoBehaviour
         }
         _rb.AddForce(movementX * transform.right * Time.deltaTime);
 
-        if (xVelocity > 0) Mesh.transform.localEulerAngles = new Vector3(-90, 180, 0);
-        if (xVelocity < 0) Mesh.transform.localEulerAngles = new Vector3(-90, 0, 0);
+        if (xVelocity > 0 && !wallJump) Mesh.transform.localEulerAngles = new Vector3(-90, 180, 0);
+        if (xVelocity < 0 && !wallJump) Mesh.transform.localEulerAngles = new Vector3(-90, 0, 0);
     }
 
     private void Jump()
@@ -72,7 +81,6 @@ public class Player_Controller : MonoBehaviour
         if (Physics.Raycast(transform.position - new Vector3(0, 0.45f, 0), -transform.up, 0.2f))
         {
             Grounded = true;
-
         }
 
         if (!Physics.Raycast(transform.position - new Vector3(0, 0.45f, 0), -transform.up, 0.2f))
@@ -100,9 +108,45 @@ public class Player_Controller : MonoBehaviour
         if (yVelocity >= 0 || !Grounded) Physics.gravity = new Vector3(0, -11f, 0);
     }
 
+    private void WallJump()
+    {
+        if (Physics.Raycast(transform.position - new Vector3(0.45f, 0, 0), -transform.right, 0.2f) && !Grounded)
+        {
+            wallJump = true;
+            if (wallJump && Input.GetButtonDown("Jump") && !Jumping)
+            {
+                print("Right");
+                _rb.velocity = new Vector2(WallJumpSide, WallJumpUp);
+                wallJumping = true;
+                wallJump = false;
+                StartCoroutine(WallJumpingTime());
+            }
+            if (yVelocity > 0 && !wallJumping) _rb.velocity = new Vector3(0, yVelocity, 0);
+            if (yVelocity < 0 && !wallJumping) _rb.velocity = new Vector3(0, -WallSlide, 0);
+
+        }
+        else if (Physics.Raycast(transform.position + new Vector3(0.45f, 0, 0), transform.right, 0.2f) && !Grounded)
+        {
+            wallJump = true;
+            if (wallJump && Input.GetButtonDown("Jump") && !Jumping)
+            {
+                print("Left");
+                _rb.velocity = new Vector2(-WallJumpSide, WallJumpUp);
+                wallJumping = true;
+                wallJump = false;
+                StartCoroutine(WallJumpingTime());
+            }
+            if (yVelocity > 0 && !wallJumping) _rb.velocity = new Vector3(0, yVelocity, 0);
+            if (yVelocity < 0 && !wallJumping) _rb.velocity = new Vector3(0, -WallSlide, 0);
+            
+        }
+        else wallJump = false;
+    }
+
     private void OnDrawGizmos()
     {
-        Gizmos.DrawRay(transform.position - new Vector3(0, 0.45f, 0), transform.up * -0.3f);
+        Gizmos.DrawRay(transform.position - new Vector3(0.45f, 0, 0), -transform.right *0.2f);
+        Gizmos.DrawRay(transform.position + new Vector3(0.45f, 0, 0), transform.right * 0.2f);
     }
 
     IEnumerator CoyoteTime()
@@ -115,5 +159,11 @@ public class Player_Controller : MonoBehaviour
     {
         yield return new WaitForSeconds(0.5f);
         Jumping = false;
+    }
+
+    IEnumerator WallJumpingTime()
+    {
+        yield return new WaitForSeconds(0.4f);
+        wallJumping = false;
     }
 }
