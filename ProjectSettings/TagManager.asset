@@ -11,9 +11,9 @@ TagManager:
   - Ground
   - Water
   - UI
-  - 
-  - 
-  - 
+  - Clipable
+  - Player
+  - PlayerClip
   - 
   - 
   - 

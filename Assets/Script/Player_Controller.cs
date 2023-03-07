@@ -24,14 +24,18 @@ public class Player_Controller : MonoBehaviour
     private float WallJumpSide;
     [SerializeField]
     private float WallSlide;
+    [SerializeField]
+    private float TransfoTime;
     public bool Grounded;
     private bool Jumping;
     private float yVelocity;
     private float xVelocity;
     private float movementX;
     public GameObject Mesh;
-    public bool wallJump;
-    public bool wallJumping;
+    private bool wallJump;
+    private bool wallJumping;
+    private bool Fluid;
+    private bool Transforming;
     //public Animator Anim;
     // Start is called before the first frame update
     void Start()
@@ -43,13 +47,13 @@ public class Player_Controller : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
         xVelocity = _rb.velocity.x;
         yVelocity = _rb.velocity.y;
 
+        Clip();
         Move();
         Jump();
-        WallJump();
+        if (!Fluid && !Grounded) WallJump();
     }
 
     private void Move()
@@ -110,12 +114,11 @@ public class Player_Controller : MonoBehaviour
 
     private void WallJump()
     {
-        if (Physics.Raycast(transform.position - new Vector3(0.45f, 0, 0), -transform.right, 0.2f) && !Grounded)
+        if (Physics.Raycast(transform.position - new Vector3(0.45f, 0, 0), -transform.right, 0.2f))
         {
             wallJump = true;
             if (wallJump && Input.GetButtonDown("Jump") && !Jumping)
             {
-                print("Right");
                 _rb.velocity = new Vector2(WallJumpSide, WallJumpUp);
                 wallJumping = true;
                 wallJump = false;
@@ -125,12 +128,11 @@ public class Player_Controller : MonoBehaviour
             if (yVelocity < 0 && !wallJumping) _rb.velocity = new Vector3(0, -WallSlide, 0);
 
         }
-        else if (Physics.Raycast(transform.position + new Vector3(0.45f, 0, 0), transform.right, 0.2f) && !Grounded)
+        else if (Physics.Raycast(transform.position + new Vector3(0.45f, 0, 0), transform.right, 0.2f))
         {
             wallJump = true;
             if (wallJump && Input.GetButtonDown("Jump") && !Jumping)
             {
-                print("Left");
                 _rb.velocity = new Vector2(-WallJumpSide, WallJumpUp);
                 wallJumping = true;
                 wallJump = false;
@@ -141,6 +143,24 @@ public class Player_Controller : MonoBehaviour
             
         }
         else wallJump = false;
+    }
+
+    private void Clip()
+    {
+        if (Input.GetButtonDown("Fire1") && !Fluid && !Transforming)
+        {
+            gameObject.layer = 8;
+            Fluid = true;
+            Transforming = true;
+            StartCoroutine(TransfoDelay());
+        }
+        if (Input.GetButtonDown("Fire1") && Fluid && !Transforming)
+        {
+            gameObject.layer = 7;
+            Fluid = false;
+            Transforming = true;
+            StartCoroutine(TransfoDelay());
+        }
     }
 
     private void OnDrawGizmos()
@@ -157,13 +177,19 @@ public class Player_Controller : MonoBehaviour
 
     IEnumerator JumpRefresh()
     {
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(0.3f);
         Jumping = false;
     }
 
     IEnumerator WallJumpingTime()
     {
-        yield return new WaitForSeconds(0.4f);
+        yield return new WaitForSeconds(0.5f);
         wallJumping = false;
+    }
+
+    IEnumerator TransfoDelay()
+    {
+        yield return new WaitForSeconds(TransfoTime);
+        Transforming = false;
     }
 }

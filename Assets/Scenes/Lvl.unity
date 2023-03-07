@@ -557,6 +557,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: blob2
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: adf24eb19e7df8a4d9cda4d2a29ef465,
+        type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: adf24eb19e7df8a4d9cda4d2a29ef465, type: 3}
 --- !u!1 &832575517
@@ -636,7 +641,7 @@ Transform:
   m_GameObject: {fileID: 1291461273}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 11.36, y: 3.36, z: 0}
-  m_LocalScale: {x: 3, y: 10, z: 1}
+  m_LocalScale: {x: 3, y: 10, z: 4}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1468383335}
@@ -717,7 +722,7 @@ GameObject:
   - component: {fileID: 1404896202}
   - component: {fileID: 1404896201}
   - component: {fileID: 1404896204}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Player
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -761,10 +766,9 @@ MonoBehaviour:
   WallJumpUp: 6
   WallJumpSide: 7
   WallSlide: 1
+  TransfoTime: 0.5
   Grounded: 1
   Mesh: {fileID: 519798846}
-  wallJump: 0
-  wallJumping: 0
 --- !u!4 &1404896203
 Transform:
   m_ObjectHideFlags: 0
@@ -938,7 +942,7 @@ GameObject:
   - component: {fileID: 2101061227}
   - component: {fileID: 2101061226}
   - component: {fileID: 2101061225}
-  m_Layer: 3
+  m_Layer: 6
   m_Name: ww (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -953,7 +957,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2101061223}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 1.53, y: 3.36, z: 0}
+  m_LocalPosition: {x: 1.1, y: 2.11, z: 0}
   m_LocalScale: {x: 3, y: 10, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
