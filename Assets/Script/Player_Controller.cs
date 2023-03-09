@@ -25,6 +25,10 @@ public class Player_Controller : MonoBehaviour
     [SerializeField]
     private float WallSlide;
     [SerializeField]
+    private float Speed2;
+    [SerializeField]
+    private float jump2;
+    [SerializeField]
     private float TransfoTime;
     public bool Grounded;
     private bool Jumping;
@@ -32,10 +36,13 @@ public class Player_Controller : MonoBehaviour
     private float xVelocity;
     private float movementX;
     public GameObject Mesh;
-    private bool wallJump;
+    private bool wallSlide;
     private bool wallJumping;
     private bool Fluid;
     private bool Transforming;
+    public Material hard;
+    public Material fluid;
+    public GameObject Slime;
     //public Animator Anim;
     // Start is called before the first frame update
     void Start()
@@ -54,30 +61,41 @@ public class Player_Controller : MonoBehaviour
         Move();
         Jump();
         if (!Fluid && !Grounded) WallJump();
+        if (Fluid && !Grounded) WallJumpFluid();
     }
 
     private void Move()
     {
         _Input = Input.GetAxis("Horizontal");
+        if (Grounded) wallSlide = false;
 
-        if (Grounded && !wallJumping)
+        if (Grounded && !wallJumping && !Fluid)
         {
             float targetSpeedX = _Input * Speed;
             float speedDifX = targetSpeedX - _rb.velocity.x;
             float accelRateX = (Mathf.Abs(targetSpeedX) < 0.01f) ? Acceleration : Deceleration;
             movementX = Mathf.Pow(Mathf.Abs(speedDifX) * accelRateX, velPower) * Mathf.Sign(speedDifX);
         }
-        if (!Grounded && !wallJumping)
+        if (!Grounded && !wallJumping && !Fluid)
         {
             float targetSpeedX = _Input * AirSpeed;
             float speedDifX = targetSpeedX - _rb.velocity.x;
             float accelRateX = (Mathf.Abs(targetSpeedX) < 0.01f) ? Acceleration : Deceleration;
             movementX = Mathf.Pow(Mathf.Abs(speedDifX) * accelRateX, velPower) * Mathf.Sign(speedDifX);
         }
+        if ((Grounded && Fluid))
+        {
+            float targetSpeedX = _Input * Speed2;
+            float speedDifX = targetSpeedX - _rb.velocity.x;
+            float accelRateX = (Mathf.Abs(targetSpeedX) < 0.01f) ? Acceleration : Deceleration;
+            movementX = Mathf.Pow(Mathf.Abs(speedDifX) * accelRateX, velPower) * Mathf.Sign(speedDifX);
+        }
+        if (!Grounded && Fluid) movementX = 0;
+
         _rb.AddForce(movementX * transform.right * Time.deltaTime);
 
-        if (xVelocity > 0 && !wallJump) Mesh.transform.localEulerAngles = new Vector3(-90, 180, 0);
-        if (xVelocity < 0 && !wallJump) Mesh.transform.localEulerAngles = new Vector3(-90, 0, 0);
+        if (xVelocity > 0 && !wallSlide) Mesh.transform.localEulerAngles = new Vector3(-90, 180, 0);
+        if (xVelocity < 0 && !wallSlide) Mesh.transform.localEulerAngles = new Vector3(-90, 0, 0);
     }
 
     private void Jump()
@@ -99,51 +117,75 @@ public class Player_Controller : MonoBehaviour
             }
         }
 
-        if (Input.GetButton("Jump") && Grounded && !Jumping)
+        if (Input.GetButton("Jump") && Grounded && !Jumping && !Fluid)
         {
             _rb.velocity = new Vector2(xVelocity, jump);
             Grounded = false;
             Jumping = true;
             StartCoroutine(JumpRefresh());
         }
+        if (Input.GetButton("Jump") && Grounded && !Jumping && Fluid)
+        {
+            _rb.velocity = new Vector2(xVelocity, jump2);
+            Grounded = false;
+            Jumping = true;
+            StartCoroutine(JumpRefresh());
+        }
 
         yVelocity = _rb.velocity.y;
-        if (yVelocity < 0) Physics.gravity = new Vector3(0, -20, 0);
-        if (yVelocity >= 0 || !Grounded) Physics.gravity = new Vector3(0, -11f, 0);
+        if (yVelocity < 0) Physics.gravity = new Vector3(0, -30, 0);
+        if (yVelocity >= 0 || !Grounded) Physics.gravity = new Vector3(0, -20f, 0);
     }
 
     private void WallJump()
     {
-        if (Physics.Raycast(transform.position - new Vector3(0.45f, 0, 0), -transform.right, 0.2f))
+        RaycastHit hit;
+        if (Physics.Raycast(transform.position - new Vector3(0.45f, 0, 0), -transform.right, out hit, 0.2f) && !hit.collider.CompareTag("Raycast Ignore"))
         {
-            wallJump = true;
-            if (wallJump && Input.GetButtonDown("Jump") && !Jumping)
+            wallSlide = true;
+            if (wallSlide && Input.GetButtonDown("Jump") && !Jumping)
             {
                 _rb.velocity = new Vector2(WallJumpSide, WallJumpUp);
                 wallJumping = true;
-                wallJump = false;
+                wallSlide = false;
+                StartCoroutine(WallJumpingTime());
+            }
+            if (yVelocity > 0 && !wallJumping) _rb.velocity = new Vector3(0, yVelocity, 0);
+            if (yVelocity < 0 && !wallJumping) _rb.velocity = new Vector3(0, -WallSlide, 0);
+        }
+        else if (Physics.Raycast(transform.position + new Vector3(0.45f, 0, 0), transform.right, out hit, 0.2f) && !hit.collider.CompareTag("Raycast Ignore"))
+        {
+            wallSlide = true;
+            if (wallSlide && Input.GetButtonDown("Jump") && !Jumping)
+            {
+                _rb.velocity = new Vector2(-WallJumpSide, WallJumpUp);
+                wallJumping = true;
+                wallSlide = false;
                 StartCoroutine(WallJumpingTime());
             }
             if (yVelocity > 0 && !wallJumping) _rb.velocity = new Vector3(0, yVelocity, 0);
             if (yVelocity < 0 && !wallJumping) _rb.velocity = new Vector3(0, -WallSlide, 0);
 
         }
-        else if (Physics.Raycast(transform.position + new Vector3(0.45f, 0, 0), transform.right, 0.2f))
-        {
-            wallJump = true;
-            if (wallJump && Input.GetButtonDown("Jump") && !Jumping)
-            {
-                _rb.velocity = new Vector2(-WallJumpSide, WallJumpUp);
-                wallJumping = true;
-                wallJump = false;
-                StartCoroutine(WallJumpingTime());
-            }
-            if (yVelocity > 0 && !wallJumping) _rb.velocity = new Vector3(0, yVelocity, 0);
-            if (yVelocity < 0 && !wallJumping) _rb.velocity = new Vector3(0, -WallSlide, 0);
-            
-        }
-        else wallJump = false;
+        else wallSlide = false;
     }
+
+    void WallJumpFluid()
+    {
+        RaycastHit hit;
+        if (Physics.Raycast(transform.position - new Vector3(0.45f, 0, 0), -transform.right, out hit, 0.2f) && !hit.collider.CompareTag("Raycast Ignore"))
+        {
+            if (yVelocity > 0) _rb.velocity = new Vector3(0, yVelocity, 0);
+            if (yVelocity < 0) _rb.velocity = new Vector3(0, -WallSlide, 0);
+
+        }
+        else if (Physics.Raycast(transform.position + new Vector3(0.45f, 0, 0), transform.right, out hit, 0.2f) && !hit.collider.CompareTag("Raycast Ignore"))
+        {
+            if (yVelocity > 0) _rb.velocity = new Vector3(0, yVelocity, 0);
+            if (yVelocity < 0) _rb.velocity = new Vector3(0, -WallSlide, 0);
+        }
+    }
+
 
     private void Clip()
     {
@@ -152,6 +194,7 @@ public class Player_Controller : MonoBehaviour
             gameObject.layer = 8;
             Fluid = true;
             Transforming = true;
+            Slime.GetComponent<MeshRenderer>().material = fluid;
             StartCoroutine(TransfoDelay());
         }
         if (Input.GetButtonDown("Fire1") && Fluid && !Transforming)
@@ -159,14 +202,19 @@ public class Player_Controller : MonoBehaviour
             gameObject.layer = 7;
             Fluid = false;
             Transforming = true;
+            Slime.GetComponent<MeshRenderer>().material = hard;
             StartCoroutine(TransfoDelay());
         }
     }
 
-    private void OnDrawGizmos()
+    private void OnTriggerEnter(Collider other)
     {
-        Gizmos.DrawRay(transform.position - new Vector3(0.45f, 0, 0), -transform.right *0.2f);
-        Gizmos.DrawRay(transform.position + new Vector3(0.45f, 0, 0), transform.right * 0.2f);
+        if (other.gameObject.CompareTag("Tramplin"))
+        {
+            other.gameObject.GetComponent<Tramplin>().Launch(_rb);
+            wallJumping = true;
+            StartCoroutine(WallJumpingTime());
+        }
     }
 
     IEnumerator CoyoteTime()
