@@ -48,9 +48,9 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _Distortion: -10
+    - _Distortion: 0
     - _QueueControl: 0
     - _QueueOffset: 0
-    - _VertexDisplacement: 0.1
+    - _VertexDisplacement: 0.002
     m_Colors: []
   m_BuildTextureStacks: []
