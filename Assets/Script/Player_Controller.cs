@@ -45,6 +45,7 @@ public class Player_Controller : MonoBehaviour
     public GameObject Slime;
     public Animator anim;
     public GameObject Pivot;
+    
     //public Animator Anim;
     // Start is called before the first frame update
     void Start()
@@ -66,6 +67,7 @@ public class Player_Controller : MonoBehaviour
         Jump();
         if (!Fluid && !Grounded) WallJump();
         if (Fluid && !Grounded) WallJumpFluid();
+        if (!Grounded && !wallSlide) AirRota();
     }
 
     private void Move()
@@ -234,7 +236,8 @@ public class Player_Controller : MonoBehaviour
 
     void AirRota()
     {
-
+        var angle1 = Mathf.Atan2(_rb.velocity.y, _rb.velocity.x) * Mathf.Rad2Deg;
+        Pivot.transform.localEulerAngles = new Vector3(0, 0, angle1 - 90);
     }
 
     private void OnTriggerEnter(Collider other)
