@@ -1,6 +1,6 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.VFX;
 
 public class Player_Controller : MonoBehaviour
 {
@@ -48,6 +48,8 @@ public class Player_Controller : MonoBehaviour
     public ParticleSystem transfo;
     public Transform Respawn;
     private bool Dead;
+    public VisualEffect RespawnFX;
+    public VisualEffect DeadFx;
     //public Animator Anim;
     // Start is called before the first frame update
     void Start()
@@ -246,6 +248,13 @@ public class Player_Controller : MonoBehaviour
         Pivot.transform.localEulerAngles = new Vector3(0, 0, angle1 - 90);
     }
 
+    void Death()
+    {
+        Dead = true;
+        StartCoroutine(DeathDelay());
+    }
+
+
     private void OnTriggerEnter(Collider other)
     {
         if (other.gameObject.CompareTag("Tramplin"))
@@ -266,14 +275,6 @@ public class Player_Controller : MonoBehaviour
         {
             Death();
         }
-    }
-
-
-
-    void Death()
-    {
-        Dead = true;
-        StartCoroutine(DeathDelay());
     }
 
     IEnumerator CoyoteTime()
@@ -302,8 +303,13 @@ public class Player_Controller : MonoBehaviour
     }
     IEnumerator DeathDelay()
     {
-        yield return new WaitForSeconds(2);
+        DeadFx.Play();
+        Mesh.SetActive(false);
+        yield return new WaitForSeconds(1.5f);
+        RespawnFX.Play();
+        yield return new WaitForSeconds(0.5f);
+        Mesh.SetActive(true);
         Dead = false;
-        transform.position = Respawn.position;
+        transform.position = Respawn.position;  
     }
 }

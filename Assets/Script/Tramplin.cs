@@ -14,7 +14,7 @@ public class Tramplin : MonoBehaviour
 
     public void Launch(Rigidbody rb)
     {
+        rb.velocity = new Vector3(0, 0, 0);
         rb.velocity = new Vector3(LaunchX, LaunchY, 0);
-        
     }
 }
