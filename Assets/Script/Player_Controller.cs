@@ -43,6 +43,8 @@ public class Player_Controller : MonoBehaviour
     public Material hard;
     public Material fluid;
     public GameObject Slime;
+    public Animator anim;
+    public GameObject Pivot;
     //public Animator Anim;
     // Start is called before the first frame update
     void Start()
@@ -55,7 +57,9 @@ public class Player_Controller : MonoBehaviour
     void Update()
     {
         xVelocity = _rb.velocity.x;
+        anim.SetFloat("Xvelocity", Mathf.Abs(xVelocity));
         yVelocity = _rb.velocity.y;
+        anim.SetFloat("Yvelocity", yVelocity);
 
         Clip();
         Move();
@@ -67,7 +71,12 @@ public class Player_Controller : MonoBehaviour
     private void Move()
     {
         _Input = Input.GetAxis("Horizontal");
-        if (Grounded) wallSlide = false;
+        if (Grounded)
+        {
+            anim.SetBool("Wall", false);
+            wallSlide = false;
+            Pivot.transform.localEulerAngles = new Vector3(0, 0, 0);
+        }
 
         if (Grounded && !wallJumping && !Fluid)
         {
@@ -103,6 +112,7 @@ public class Player_Controller : MonoBehaviour
         if (Physics.Raycast(transform.position - new Vector3(0, 0.45f, 0), -transform.up, 0.2f))
         {
             Grounded = true;
+            anim.SetBool("Grounded", true);
         }
 
         if (!Physics.Raycast(transform.position - new Vector3(0, 0.45f, 0), -transform.up, 0.2f))
@@ -114,6 +124,7 @@ public class Player_Controller : MonoBehaviour
             if (Grounded && Jumping)
             {
                 Grounded = false;
+                anim.SetBool("Grounded", false);
             }
         }
 
@@ -121,6 +132,7 @@ public class Player_Controller : MonoBehaviour
         {
             _rb.velocity = new Vector2(xVelocity, jump);
             Grounded = false;
+            anim.SetBool("Grounded", false);
             Jumping = true;
             StartCoroutine(JumpRefresh());
         }
@@ -128,6 +140,7 @@ public class Player_Controller : MonoBehaviour
         {
             _rb.velocity = new Vector2(xVelocity, jump2);
             Grounded = false;
+            anim.SetBool("Grounded", false);
             Jumping = true;
             StartCoroutine(JumpRefresh());
         }
@@ -142,12 +155,15 @@ public class Player_Controller : MonoBehaviour
         RaycastHit hit;
         if (Physics.Raycast(transform.position - new Vector3(0.45f, 0, 0), -transform.right, out hit, 0.2f) && !hit.collider.CompareTag("Raycast Ignore"))
         {
+            Pivot.transform.localEulerAngles = new Vector3(0, 0, -90);
+            anim.SetBool("Wall", true);
             wallSlide = true;
             if (wallSlide && Input.GetButtonDown("Jump") && !Jumping)
             {
                 _rb.velocity = new Vector2(WallJumpSide, WallJumpUp);
                 wallJumping = true;
                 wallSlide = false;
+                anim.SetBool("Wall", false);
                 StartCoroutine(WallJumpingTime());
             }
             if (yVelocity > 0 && !wallJumping) _rb.velocity = new Vector3(0, yVelocity, 0);
@@ -155,19 +171,26 @@ public class Player_Controller : MonoBehaviour
         }
         else if (Physics.Raycast(transform.position + new Vector3(0.45f, 0, 0), transform.right, out hit, 0.2f) && !hit.collider.CompareTag("Raycast Ignore"))
         {
+            Pivot.transform.localEulerAngles = new Vector3(0, 0, 90);
+            anim.SetBool("Wall", true);
             wallSlide = true;
             if (wallSlide && Input.GetButtonDown("Jump") && !Jumping)
             {
                 _rb.velocity = new Vector2(-WallJumpSide, WallJumpUp);
                 wallJumping = true;
                 wallSlide = false;
+                anim.SetBool("Wall", false);
                 StartCoroutine(WallJumpingTime());
             }
             if (yVelocity > 0 && !wallJumping) _rb.velocity = new Vector3(0, yVelocity, 0);
             if (yVelocity < 0 && !wallJumping) _rb.velocity = new Vector3(0, -WallSlide, 0);
 
         }
-        else wallSlide = false;
+        if (!Physics.Raycast(transform.position - new Vector3(0.45f, 0, 0), -transform.right, 0.2f) && !Physics.Raycast(transform.position + new Vector3(0.45f, 0, 0), transform.right, 0.2f))
+        {
+            wallSlide = false;
+            anim.SetBool("Wall", false);
+        }
     }
 
     void WallJumpFluid()
@@ -175,12 +198,14 @@ public class Player_Controller : MonoBehaviour
         RaycastHit hit;
         if (Physics.Raycast(transform.position - new Vector3(0.45f, 0, 0), -transform.right, out hit, 0.2f) && !hit.collider.CompareTag("Raycast Ignore"))
         {
+            anim.SetBool("Wall", true);
             if (yVelocity > 0) _rb.velocity = new Vector3(0, yVelocity, 0);
             if (yVelocity < 0) _rb.velocity = new Vector3(0, -WallSlide, 0);
 
         }
         else if (Physics.Raycast(transform.position + new Vector3(0.45f, 0, 0), transform.right, out hit, 0.2f) && !hit.collider.CompareTag("Raycast Ignore"))
         {
+            anim.SetBool("Wall", true);
             if (yVelocity > 0) _rb.velocity = new Vector3(0, yVelocity, 0);
             if (yVelocity < 0) _rb.velocity = new Vector3(0, -WallSlide, 0);
         }
@@ -194,7 +219,7 @@ public class Player_Controller : MonoBehaviour
             gameObject.layer = 8;
             Fluid = true;
             Transforming = true;
-            Slime.GetComponent<MeshRenderer>().material = fluid;
+            Slime.GetComponent<SkinnedMeshRenderer>().material = fluid;
             StartCoroutine(TransfoDelay());
         }
         if (Input.GetButtonDown("Fire1") && Fluid && !Transforming)
@@ -202,9 +227,14 @@ public class Player_Controller : MonoBehaviour
             gameObject.layer = 7;
             Fluid = false;
             Transforming = true;
-            Slime.GetComponent<MeshRenderer>().material = hard;
+            Slime.GetComponent<SkinnedMeshRenderer>().material = hard;
             StartCoroutine(TransfoDelay());
         }
+    }
+
+    void AirRota()
+    {
+
     }
 
     private void OnTriggerEnter(Collider other)
@@ -221,6 +251,7 @@ public class Player_Controller : MonoBehaviour
     {
         yield return new WaitForSeconds(0.15f);
         Grounded = false;
+        anim.SetBool("Grounded", false);
     }
 
     IEnumerator JumpRefresh()
