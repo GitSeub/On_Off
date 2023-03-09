@@ -21,7 +21,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: M_Slime
-  m_Shader: {fileID: -6465566751694194690, guid: 11092797d70bc094988e97d69f3e4a2b,
+  m_Shader: {fileID: -6465566751694194690, guid: 3cad8dce8248bb64b87db6354189c0cb,
     type: 3}
   m_ValidKeywords: []
   m_InvalidKeywords: []
