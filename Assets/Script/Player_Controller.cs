@@ -45,29 +45,33 @@ public class Player_Controller : MonoBehaviour
     public GameObject Slime;
     public Animator anim;
     public GameObject Pivot;
-    
+    public ParticleSystem transfo;
+    public Transform Respawn;
+    private bool Dead;
     //public Animator Anim;
     // Start is called before the first frame update
     void Start()
     {
-
         _rb = GetComponent<Rigidbody>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        xVelocity = _rb.velocity.x;
-        anim.SetFloat("Xvelocity", Mathf.Abs(xVelocity));
-        yVelocity = _rb.velocity.y;
-        anim.SetFloat("Yvelocity", yVelocity);
+        if (!Dead)
+        {
+            xVelocity = _rb.velocity.x;
+            anim.SetFloat("Xvelocity", Mathf.Abs(xVelocity));
+            yVelocity = _rb.velocity.y;
+            anim.SetFloat("Yvelocity", yVelocity);
 
-        Clip();
-        Move();
-        Jump();
-        if (!Fluid && !Grounded) WallJump();
-        if (Fluid && !Grounded) WallJumpFluid();
-        if (!Grounded && !wallSlide) AirRota();
+            Clip();
+            Move();
+            Jump();
+            if (!Fluid && !Grounded) WallJump();
+            if (Fluid && !Grounded) WallJumpFluid();
+            if (!Grounded && !wallSlide) AirRota();
+        }
     }
 
     private void Move()
@@ -223,6 +227,7 @@ public class Player_Controller : MonoBehaviour
             Transforming = true;
             Slime.GetComponent<SkinnedMeshRenderer>().material = fluid;
             StartCoroutine(TransfoDelay());
+            transfo.Play();
         }
         if (Input.GetButtonDown("Fire1") && Fluid && !Transforming)
         {
@@ -231,6 +236,7 @@ public class Player_Controller : MonoBehaviour
             Transforming = true;
             Slime.GetComponent<SkinnedMeshRenderer>().material = hard;
             StartCoroutine(TransfoDelay());
+            transfo.Play();
         }
     }
 
@@ -248,6 +254,26 @@ public class Player_Controller : MonoBehaviour
             wallJumping = true;
             StartCoroutine(WallJumpingTime());
         }
+        else if (other.gameObject.CompareTag("Death"))
+        {
+            Death();
+        }
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Raycast Ignore"))
+        {
+            Death();
+        }
+    }
+
+
+
+    void Death()
+    {
+        Dead = true;
+        StartCoroutine(DeathDelay());
     }
 
     IEnumerator CoyoteTime()
@@ -273,5 +299,11 @@ public class Player_Controller : MonoBehaviour
     {
         yield return new WaitForSeconds(TransfoTime);
         Transforming = false;
+    }
+    IEnumerator DeathDelay()
+    {
+        yield return new WaitForSeconds(2);
+        Dead = false;
+        transform.position = Respawn.position;
     }
 }
