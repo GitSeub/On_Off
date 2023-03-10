@@ -48,8 +48,13 @@ public class Player_Controller : MonoBehaviour
     public ParticleSystem transfo;
     public Transform Respawn;
     private bool Dead;
-    public VisualEffect RespawnFX;
-    public VisualEffect DeadFx;
+    public ParticleSystem RespawnFX;
+    public ParticleSystem DeadFx;
+    public ParticleSystem Indicateur1;
+    public ParticleSystem Indicateur2;
+    public ParticleSystem Indicateur3;
+    public ParticleSystem Indicateur4;
+    public ParticleSystem Indicateur5;
     //public Animator Anim;
     // Start is called before the first frame update
     void Start()
@@ -117,10 +122,14 @@ public class Player_Controller : MonoBehaviour
 
     private void Jump()
     {
-        if (Physics.Raycast(transform.position - new Vector3(0, 0.45f, 0), -transform.up, 0.2f))
+        RaycastHit hit;
+        if (Physics.Raycast(transform.position - new Vector3(0, 0.45f, 0), -transform.up, out hit, 0.2f) )
         {
-            Grounded = true;
-            anim.SetBool("Grounded", true);
+            if (!hit.collider.CompareTag("Raycast Ignore"))
+            {
+                Grounded = true;
+                anim.SetBool("Grounded", true);
+            }
         }
 
         if (!Physics.Raycast(transform.position - new Vector3(0, 0.45f, 0), -transform.up, 0.2f))
@@ -275,7 +284,8 @@ public class Player_Controller : MonoBehaviour
         }
         else if (other.gameObject.CompareTag("Death"))
         {
-            Death();
+            if (!Dead) Death();
+
         }
     }
 
@@ -283,7 +293,7 @@ public class Player_Controller : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Raycast Ignore"))
         {
-            Death();
+            if (!Dead) Death();
         }
     }
 
@@ -310,6 +320,11 @@ public class Player_Controller : MonoBehaviour
     {
         yield return new WaitForSeconds(TransfoTime);
         Transforming = false;
+        Indicateur1.Play();
+        Indicateur2.Play();
+        Indicateur3.Play();
+        Indicateur4.Play();
+        Indicateur5.Play();
     }
     IEnumerator DeathDelay()
     {
