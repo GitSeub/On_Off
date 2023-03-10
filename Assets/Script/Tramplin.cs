@@ -16,5 +16,7 @@ public class Tramplin : MonoBehaviour
     {
         rb.velocity = new Vector3(0, 0, 0);
         rb.velocity = new Vector3(LaunchX, LaunchY, 0);
+        anim1.SetTrigger("Boing");
+        anim2.SetTrigger("Boing");
     }
 }
