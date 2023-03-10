@@ -48,8 +48,8 @@ public class Player_Controller : MonoBehaviour
     public ParticleSystem transfo;
     public Transform Respawn;
     private bool Dead;
-    public ParticleSystem RespawnFX;
-    public ParticleSystem DeadFx;
+    public VisualEffect RespawnFX;
+    public VisualEffect DeadFx;
     public ParticleSystem Indicateur1;
     public ParticleSystem Indicateur2;
     public ParticleSystem Indicateur3;
