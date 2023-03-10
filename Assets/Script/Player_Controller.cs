@@ -206,6 +206,8 @@ public class Player_Controller : MonoBehaviour
         RaycastHit hit;
         if (Physics.Raycast(transform.position - new Vector3(0.45f, 0, 0), -transform.right, out hit, 0.2f) && !hit.collider.CompareTag("Raycast Ignore"))
         {
+            wallSlide = true;
+            Pivot.transform.localEulerAngles = new Vector3(0, 0, -90);
             anim.SetBool("Wall", true);
             if (yVelocity > 0) _rb.velocity = new Vector3(0, yVelocity, 0);
             if (yVelocity < 0) _rb.velocity = new Vector3(0, -WallSlide, 0);
@@ -213,10 +215,18 @@ public class Player_Controller : MonoBehaviour
         }
         else if (Physics.Raycast(transform.position + new Vector3(0.45f, 0, 0), transform.right, out hit, 0.2f) && !hit.collider.CompareTag("Raycast Ignore"))
         {
+            wallSlide = true;
+            Pivot.transform.localEulerAngles = new Vector3(0, 0, 90);
             anim.SetBool("Wall", true);
             if (yVelocity > 0) _rb.velocity = new Vector3(0, yVelocity, 0);
             if (yVelocity < 0) _rb.velocity = new Vector3(0, -WallSlide, 0);
         }
+        if (!Physics.Raycast(transform.position - new Vector3(0.45f, 0, 0), -transform.right, 0.2f) && !Physics.Raycast(transform.position + new Vector3(0.45f, 0, 0), transform.right, 0.2f))
+        {
+            wallSlide = false;
+            anim.SetBool("Wall", false);
+        }
+
     }
 
 

@@ -6,6 +6,8 @@ public class CamManager : MonoBehaviour
 {
     public Transform CamPos;
     public Camera Cam;
+    public GameObject Respawn;
+    public Transform ResPos;
     // Start is called before the first frame update
     void Start()
     {
@@ -23,6 +25,7 @@ public class CamManager : MonoBehaviour
         if (other.gameObject.CompareTag("Player") && CamPos.position != Cam.transform.position)
         {
             Cam.transform.position = CamPos.position;
+            Respawn.transform.position = ResPos.position;
         }
     }
 }
