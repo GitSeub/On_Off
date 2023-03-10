@@ -18,5 +18,6 @@ public class Tramplin : MonoBehaviour
         rb.velocity = new Vector3(LaunchX, LaunchY, 0);
         anim1.SetTrigger("Boing");
         anim2.SetTrigger("Boing");
+        FindObjectOfType<AudioManager>().Play("Jump");
     }
 }

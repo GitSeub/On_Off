@@ -152,6 +152,8 @@ public class Player_Controller : MonoBehaviour
             anim.SetBool("Grounded", false);
             Jumping = true;
             StartCoroutine(JumpRefresh());
+            FindObjectOfType<AudioManager>().Play("Jump");
+          
         }
         if (Input.GetButton("Jump") && Grounded && !Jumping && Fluid)
         {
@@ -160,6 +162,7 @@ public class Player_Controller : MonoBehaviour
             anim.SetBool("Grounded", false);
             Jumping = true;
             StartCoroutine(JumpRefresh());
+            FindObjectOfType<AudioManager>().Play("Jump");
         }
 
         yVelocity = _rb.velocity.y;
@@ -177,6 +180,7 @@ public class Player_Controller : MonoBehaviour
             wallSlide = true;
             if (wallSlide && Input.GetButtonDown("Jump") && !Jumping)
             {
+                FindObjectOfType<AudioManager>().Play("Jump");
                 _rb.velocity = new Vector2(WallJumpSide, WallJumpUp);
                 wallJumping = true;
                 wallSlide = false;
@@ -193,6 +197,7 @@ public class Player_Controller : MonoBehaviour
             wallSlide = true;
             if (wallSlide && Input.GetButtonDown("Jump") && !Jumping)
             {
+                FindObjectOfType<AudioManager>().Play("Jump");
                 _rb.velocity = new Vector2(-WallJumpSide, WallJumpUp);
                 wallJumping = true;
                 wallSlide = false;
@@ -243,6 +248,7 @@ public class Player_Controller : MonoBehaviour
     {
         if (Input.GetButtonDown("Fire1") && !Fluid && !Transforming)
         {
+            FindObjectOfType<AudioManager>().Play("Switch");
             gameObject.layer = 8;
             Fluid = true;
             Transforming = true;
@@ -252,6 +258,7 @@ public class Player_Controller : MonoBehaviour
         }
         if (Input.GetButtonDown("Fire1") && Fluid && !Transforming)
         {
+            FindObjectOfType<AudioManager>().Play("Switch");
             gameObject.layer = 7;
             Fluid = false;
             Transforming = true;
@@ -270,6 +277,7 @@ public class Player_Controller : MonoBehaviour
     void Death()
     {
         Dead = true;
+        FindObjectOfType<AudioManager>().Play("Death");
         StartCoroutine(DeathDelay());
     }
 
@@ -325,6 +333,7 @@ public class Player_Controller : MonoBehaviour
         Indicateur3.Play();
         Indicateur4.Play();
         Indicateur5.Play();
+        FindObjectOfType<AudioManager>().Play("CoolDown");
     }
     IEnumerator DeathDelay()
     {
